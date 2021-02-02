@@ -1,6 +1,6 @@
 /* luna - a simple VM based programming language aimed at portability
  *
- * Copyright (c) 2021 Cleanware
+ * Copyright (c) 2021 Fossbay
  *
  * This software is provided 'as-is', without any express or implied
  * warranty. In no event will the authors be held liable for any damages
