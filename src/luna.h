@@ -38,7 +38,8 @@ struct luna_rt
     int (*write)(int, void *, int);
 };
 
-byte_t *luna_compile(char *code, int options);
+char *luna_compile(char *code);
+byte_t *luna_assemble(char *code, int options);
 int luna_execute(byte_t *program, struct luna_rt *rt);
 
 #endif /* LUNA_H */

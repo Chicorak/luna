@@ -35,7 +35,7 @@ char *keywords[] =
     "volatile ", "while ", NULL
 };
 
-byte_t *luna_compile(char *code, int options)
+char *luna_compile(char *code)
 {
     int index = 0;
     char storage[1024];
@@ -87,6 +87,11 @@ byte_t *luna_compile(char *code, int options)
 
 
     }
+}
+
+byte_t *luna_assemble(char *code, int options)
+{
+
 }
 
 int luna_execute(byte_t *program, struct luna_rt *rt)
