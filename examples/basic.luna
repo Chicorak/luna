@@ -1,0 +1,5 @@
+import luna.io;
+
+fun main() {
+    write(1, "Hello, world!\n", 14);
+}
