@@ -1,0 +1,14 @@
+[
+  {
+    "directory": "/home/abbix/Documents/Projects/luna/build",
+    "command": "ccache cc -Iluna.p -I. -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -ansi -Os -MD -MQ luna.p/luna.c.o -MF luna.p/luna.c.o.d -o luna.p/luna.c.o -c ../src/luna.c",
+    "file": "../src/luna.c",
+    "output": "luna.p/luna.c.o"
+  },
+  {
+    "directory": "/home/abbix/Documents/Projects/luna/build",
+    "command": "ccache cc -Iluna.p -I. -I../src -fdiagnostics-color=always -pipe -D_FILE_OFFSET_BITS=64 -Wall -Winvalid-pch -g -ansi -Os -MD -MQ luna.p/main.c.o -MF luna.p/main.c.o.d -o luna.p/main.c.o -c ../src/main.c",
+    "file": "../src/main.c",
+    "output": "luna.p/main.c.o"
+  }
+]

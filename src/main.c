@@ -55,8 +55,7 @@ int main(int argc, char **argv)
         0b00000001,
         0b11110000,
         0b00010001,
-        0b00000000
-    };
+        0b00000000};
 
-    printf("luna: info: program exit code was %d\n", luna_execute(bytes,&rt));
+    printf("luna: info: program exit code was %d\n", luna_execute(bytes, &rt));
 }

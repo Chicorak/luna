@@ -20,20 +20,19 @@
 */
 
 #include "luna.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 char *keywords[] =
-{
-    "import ", "break ", "case ",
-    "char ", "const ", "continue ",
-    "default ", "double ", "else ",
-    "enum ", "float ", "loop ",
-    "if ", "int ", "long ",
-    "return ", "short ", "struct ",
-    "switch ", "alias ", "unsigned ",
-    "volatile ", "while ", NULL
-};
+    {
+        "import ", "break ", "case ",
+        "char ", "const ", "continue ",
+        "default ", "double ", "else ",
+        "enum ", "float ", "loop ",
+        "if ", "int ", "long ",
+        "return ", "short ", "struct ",
+        "switch ", "alias ", "unsigned ",
+        "volatile ", "while ", NULL};
 
 char *luna_compile(char *code)
 {
@@ -44,60 +43,57 @@ char *luna_compile(char *code)
     char **tokens = malloc(sizeof(char *));
 
     int i, j;
-    for(i = 0; code[i] != 0; i++)
+    for (i = 0; code[i] != 0; i++)
     {
         char c = code[i];
 
-        switch(c)
+        switch (c)
         {
-            case '!':
-            case '#':
-            case '%':
-            case '^':
-            case '&':
-            case '*':
-            case '(':
-            case ')':
-            case '-':
-            case '+':
-            case '=':
-            case '{':
-            case '}':
-            case '[':
-            case ']':
-            case ':':
-            case ';':
-            case '\"':
-            case '\'':
-            case '<':
-            case '>':
-            case ',':
-            case '.':
-            case '?':
-            case '|':
-            case '\\':
-            {
-                break;
-            }
+        case '!':
+        case '#':
+        case '%':
+        case '^':
+        case '&':
+        case '*':
+        case '(':
+        case ')':
+        case '-':
+        case '+':
+        case '=':
+        case '{':
+        case '}':
+        case '[':
+        case ']':
+        case ':':
+        case ';':
+        case '\"':
+        case '\'':
+        case '<':
+        case '>':
+        case ',':
+        case '.':
+        case '?':
+        case '|':
+        case '\\':
+        {
+            break;
+        }
         }
 
         storage[index] = c;
         storage[index + 1] = 0;
         index++;
-
-
     }
 }
 
 byte_t *luna_assemble(char *code, int options)
 {
-
 }
 
 int luna_execute(byte_t *program, struct luna_rt *rt)
 {
     /* create a stack & call stack */
-    /* bytes wil lbe in this format: first 4 bits are instruction, second 4 bits are argument (leading bytes can be args too) */
+    /* bytes will be in this format: first 4 bits are instruction, second 4 bits are argument (leading bytes can be args too) */
     /* instructions
      - push (0001) - push a value to stack
      - pop (0010) - remove something off the top of the stack
@@ -114,22 +110,22 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
     */
 
     byte_t stack[1024]; /* represents the stack */
-    int sp = 0; /* initial index of the stack pointer */
+    int sp = 0;         /* initial index of the stack pointer */
 
     struct luna_header *header = (struct luna_header *)program;
 
     printf("Count: %d, Entry: %d\n", header->count, header->entry_point);
 
     int i;
-    for(i = 8 + header->entry_point; i < header->count + 8; i++)
+    for (i = 8 + header->entry_point; i < header->count + 8; i++)
     {
         byte_t byte = program[i];
 
-        if(byte >> 4 == PUSH)
+        if (byte >> 4 == PUSH)
         {
             byte = byte & 0x0F;
 
-            if(byte == 1)
+            if (byte == 1)
             {
                 stack[sp] = program[i + 1];
                 sp++;
@@ -144,9 +140,9 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                 return 1;
             }
         }
-        else if(byte >> 4 == ADD)
+        else if (byte >> 4 == ADD)
         {
-            if(sp < 2)
+            if (sp < 2)
             {
                 rt->error("two numbers needed");
                 return 1;
@@ -162,9 +158,9 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
             printf("ADD(%d,%d) = %d\n", a, b, stack[sp - 1]);
         }
-        else if(byte >> 4 == VMCALL)
+        else if (byte >> 4 == VMCALL)
         {
-            if(sp < 1)
+            if (sp < 1)
             {
                 rt->error("vmcall id needed");
                 return 1;
@@ -173,9 +169,9 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
             sp--;
             int vmcode = stack[sp];
 
-            if(vmcode == 1)
+            if (vmcode == 1)
             {
-                if(sp < 1)
+                if (sp < 1)
                 {
                     rt->error("vmcall needs argument");
                     return 1;
