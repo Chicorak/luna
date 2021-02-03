@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     rt.write = luna_write;
 
     char bytes[] = {
-        0b00000101,
+        0b00001010,
         0b00000000,
         0b00000000,
         0b00000000,
@@ -50,7 +50,12 @@ int main(int argc, char **argv)
         0b00000001,
         0b00010001,
         0b00000001,
-        0b01100000
+        0b01100000,
+        0b00010001,
+        0b00000001,
+        0b11110000,
+        0b00010001,
+        0b00000000
     };
 
     printf("luna: info: program exit code was %d\n", luna_execute(bytes,&rt));

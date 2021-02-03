@@ -127,8 +127,7 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
         if(byte >> 4 == PUSH)
         {
-            byte = byte << 4;
-            byte = byte >> 4;
+            byte = byte & 0x0F;
 
             if(byte == 1)
             {
@@ -159,8 +158,32 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
             sp -= 2;
 
             stack[sp] = a + b;
+            sp++;
 
-            printf("ADD(%d,%d) = %d\n", a, b, stack[sp]);
+            printf("ADD(%d,%d) = %d\n", a, b, stack[sp - 1]);
+        }
+        else if(byte >> 4 == VMCALL)
+        {
+            if(sp < 1)
+            {
+                rt->error("vmcall id needed");
+                return 1;
+            }
+
+            sp--;
+            int vmcode = stack[sp];
+
+            if(vmcode == 1)
+            {
+                if(sp < 1)
+                {
+                    rt->error("vmcall needs argument");
+                    return 1;
+                }
+
+                sp--;
+                rt->write(stack[sp], "Hello, world!\n", 14);
+            }
         }
         else
         {
@@ -169,5 +192,5 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
         }
     }
 
-    return stack[sp];
+    return stack[sp - 1];
 }

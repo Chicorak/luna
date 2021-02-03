@@ -33,7 +33,8 @@ enum byte_t
     MUL = 0b1000,
     DIV = 0b1001,
     CONST = 0b0010,
-    MOD = 0b1010
+    MOD = 0b1010,
+    VMCALL = 0b1111
 
 };
 
