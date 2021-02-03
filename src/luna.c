@@ -22,7 +22,7 @@
 #include "luna.h"
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdio.h>
 char *keywords[] =
 {
     "import ", "break ", "case ",
@@ -112,4 +112,54 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
      - div (1001) - divide the two top values on stack and push result onto stack
      - mod (1010) - modulus the two top values on stack and push result onto stack
     */
+
+  char stack[1024]; /* represents the stack */
+  int sp = 0; /* initial index of the stack pointer */
+  struct luna_header *header = (struct luna_header*)program;
+
+  header = malloc(sizeof(*header));
+  int i;
+
+  for(i = header->entry; i < header->count; i++)
+     {
+
+       byte_t byte = program[0];
+
+        if(byte >> 4 == CONST)
+	{
+	  int number = 1;
+
+	  stack[sp] = number;
+
+	  sp++;
+	}
+
+	else if(byte>>4 == ADD)
+	{
+	    if(sp<2)
+	    {
+
+	    rt->error("two numbers needed");
+            return 1;
+
+	    }
+	    
+	  /* Add the two top values of the stack and push the result to the stack */
+	  int a = stack[sp - 1];
+	  int b = stack[sp - 2];
+          sp -= 2;
+
+	 
+	 stack[sp] = a + b;
+	}
+
+	else
+	  {
+
+	    rt->error("Invalid opcode");
+	    return 1;
+	  }
+	}
+
+  return 0;
 }

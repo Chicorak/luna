@@ -35,5 +35,8 @@ int main(int argc, char **argv)
     rt.read = luna_read;
     rt.write = luna_write;
 
+    char bytes[] = {0b00100000};
+
+    luna_execute((byte_t*)bytes,&rt);
 
 }

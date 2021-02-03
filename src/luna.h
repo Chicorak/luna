@@ -24,6 +24,17 @@
 
 typedef unsigned char byte_t;
 
+enum byte_t
+{
+    ADD = 0b0110,
+    SUB = 0b0111,
+    MUL = 0b1000,
+    DIV = 0b1001,
+    CONST = 0b0010,
+    MOD = 0b1010
+  
+} opcodes; /* Disponible opcodes for the vm */
+
 struct luna_header
 {
     int entry, count;
@@ -41,5 +52,6 @@ struct luna_rt
 char *luna_compile(char *code);
 byte_t *luna_assemble(char *code, int options);
 int luna_execute(byte_t *program, struct luna_rt *rt);
+
 
 #endif /* LUNA_H */
