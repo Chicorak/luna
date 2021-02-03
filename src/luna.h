@@ -27,6 +27,7 @@ typedef unsigned char byte_t;
 /* Disponible opcodes for the vm */
 enum byte_t
 {
+    PUSH = 0b0001,
     ADD = 0b0110,
     SUB = 0b0111,
     MUL = 0b1000,

@@ -125,12 +125,25 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
     {
         byte_t byte = program[i];
 
-        if(byte >> 4 == CONST)
+        if(byte >> 4 == PUSH)
         {
-            stack[sp] = 1;
+            byte = byte << 4;
+            byte = byte >> 4;
 
-            sp++;
-            printf("CONST\n");
+            if(byte == 1)
+            {
+                stack[sp] = program[i + 1];
+                sp++;
+
+                i++;
+
+                printf("PUSH %d\n", stack[sp - 1]);
+            }
+            else
+            {
+                rt->error("unsupported size for push");
+                return 1;
+            }
         }
         else if(byte >> 4 == ADD)
         {
