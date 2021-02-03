@@ -115,15 +115,18 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
   char stack[1024]; /* represents the stack */
   int sp = 0; /* initial index of the stack pointer */
+
+  /* FIXME: header->count is always 0 */
   struct luna_header *header = (struct luna_header*)program;
 
   header = malloc(sizeof(*header));
+  
   int i;
 
-  for(i = header->entry; i < header->count; i++)
+  for(i = header->entry; i < header->count + 3; i++)
      {
 
-       byte_t byte = program[0];
+       byte_t byte = program[i];
 
         if(byte >> 4 == CONST)
 	{
@@ -132,6 +135,7 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 	  stack[sp] = number;
 
 	  sp++;
+	  printf("CONST");
 	}
 
 	else if(byte>>4 == ADD)
@@ -143,7 +147,7 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
             return 1;
 
 	    }
-	    
+
 	  /* Add the two top values of the stack and push the result to the stack */
 	  int a = stack[sp - 1];
 	  int b = stack[sp - 2];
@@ -151,6 +155,8 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
 	 
 	 stack[sp] = a + b;
+
+	 printf("%d",stack[sp]);
 	}
 
 	else
@@ -161,5 +167,6 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 	  }
 	}
 
+  free(header);
   return 0;
 }
