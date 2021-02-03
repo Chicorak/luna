@@ -21,6 +21,7 @@
 
 #include "luna.h"
 #include <stdio.h>
+#include <unistd.h>
 
 void luna_error(char *msg) { printf("luna: error: %s\n", msg); }
 int luna_read(int fd, void *buf, int cnt) { return read(fd, buf, cnt); }
@@ -31,12 +32,24 @@ int main(int argc, char **argv)
     struct luna_rt rt;
 
     rt.argc = 0;
+    rt.argv = NULL;
     rt.error = luna_error;
     rt.read = luna_read;
     rt.write = luna_write;
 
-    char bytes[] = {0b00100000,0b00100000,0b01100000};
+    char bytes[] = {
+        0b00000011,
+        0b00000000,
+        0b00000000,
+        0b00000000,
+        0b00000000,
+        0b00000000,
+        0b00000000,
+        0b00000000,
+        0b00100000,
+        0b00100000,
+        0b01100000
+    };
 
-    luna_execute((byte_t*)bytes,&rt);
-
+    printf("luna: info: program exit code was %d\n", luna_execute(bytes,&rt));
 }

@@ -113,60 +113,48 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
      - mod (1010) - modulus the two top values on stack and push result onto stack
     */
 
-  char stack[1024]; /* represents the stack */
-  int sp = 0; /* initial index of the stack pointer */
+    byte_t stack[1024]; /* represents the stack */
+    int sp = 0; /* initial index of the stack pointer */
 
-  /* FIXME: header->count is always 0 */
-  struct luna_header *header = (struct luna_header*)program;
+    struct luna_header *header = (struct luna_header *)program;
 
-  header = malloc(sizeof(*header));
-  
-  int i;
+    printf("Count: %d, Entry: %d\n", header->count, header->entry_point);
 
-  for(i = header->entry; i < header->count + 3; i++)
-     {
-
-       byte_t byte = program[i];
+    int i;
+    for(i = 8 + header->entry_point; i < header->count + 8; i++)
+    {
+        byte_t byte = program[i];
 
         if(byte >> 4 == CONST)
-	{
-	  int number = 1;
+        {
+            stack[sp] = 1;
 
-	  stack[sp] = number;
+            sp++;
+            printf("CONST\n");
+        }
+        else if(byte >> 4 == ADD)
+        {
+            if(sp < 2)
+            {
+                rt->error("two numbers needed");
+                return 1;
+            }
 
-	  sp++;
-	  printf("CONST");
-	}
+            /* Add the two top values of the stack and push the result to the stack */
+            int a = stack[sp - 1];
+            int b = stack[sp - 2];
+            sp -= 2;
 
-	else if(byte>>4 == ADD)
-	{
-	    if(sp<2)
-	    {
+            stack[sp] = a + b;
 
-	    rt->error("two numbers needed");
+            printf("ADD(%d,%d) = %d\n", a, b, stack[sp]);
+        }
+        else
+        {
+            rt->error("invalid opcode");
             return 1;
+        }
+    }
 
-	    }
-
-	  /* Add the two top values of the stack and push the result to the stack */
-	  int a = stack[sp - 1];
-	  int b = stack[sp - 2];
-          sp -= 2;
-
-	 
-	 stack[sp] = a + b;
-
-	 printf("%d",stack[sp]);
-	}
-
-	else
-	  {
-
-	    rt->error("Invalid opcode");
-	    return 1;
-	  }
-	}
-
-  free(header);
-  return 0;
+    return stack[sp];
 }
