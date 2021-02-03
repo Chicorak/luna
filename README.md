@@ -1,2 +1,2 @@
 # luna
-A simple interpreted programming language aimed at portability.
+An elegant and portable programming language.
