@@ -121,13 +121,16 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
     {
         byte_t byte = program[i];
 
-        if (byte >> 4 == PUSH)
+        switch (byte >> 4)
+        {
+
+        case PUSH:
         {
             byte = byte & 0x0F;
 
             if (byte == 1)
             {
-                stack[sp] = program[i + 1];
+                stack[sp] = program[i + 1]; /* Push the value to the stack */
                 sp++;
 
                 i++;
@@ -139,12 +142,15 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                 rt->error("unsupported size for push");
                 return 1;
             }
+            break;
         }
-        else if (byte >> 4 == ADD)
+
+        /* Maths bytecodes */
+        case ADD:
         {
             if (sp < 2)
             {
-                rt->error("two numbers needed");
+                rt->error("ADD: two numbers needed");
                 return 1;
             }
 
@@ -157,8 +163,79 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
             sp++;
 
             printf("ADD(%d,%d) = %d\n", a, b, stack[sp - 1]);
+            break;
         }
-        else if (byte >> 4 == VMCALL)
+
+        case SUB:
+        {
+            if (sp < 2)
+            {
+                rt->error("SUB: two numbers needed");
+                return 1;
+            }
+
+            /* Substract the two top values of the stack and push the result to the stack */
+
+            int a = stack[sp - 1];
+            int b = stack[sp - 2];
+
+            sp -= 2;
+
+            stack[sp] = a - b;
+            sp++;
+
+            printf("SUB(%d,%d) = %d\n", a, b, stack[sp - 1]);
+
+	    break;
+        }
+
+        case MUL:
+        {
+            if (sp < 2)
+            {
+                rt->error("MUL: two numbers needed");
+                return 1;
+            }
+
+            /* Multiply the two top values of the stack and push the result to the stack */
+
+            int a = stack[sp - 1];
+            int b = stack[sp - 2];
+
+            sp -= 2;
+
+            stack[sp] = a * b;
+            sp++;
+
+            printf("MUL(%d,%d) = %d\n", a, b, stack[sp - 1]);
+
+	    break;
+        }
+
+        case DIV:
+        {
+            if (sp < 2)
+            {
+                rt->error("DIV: two numbers needed");
+                return 1;
+            }
+
+            /* Divide the two top values of the stack and push the result to the stack */
+
+            int a = stack[sp - 1];
+            int b = stack[sp - 2];
+
+            sp -= 2;
+
+            stack[sp] = a / b;
+            sp++;
+
+            printf("DIV(%d,%d) = %d\n", a, b, stack[sp - 1]);
+
+	    break;
+        }
+	
+        case VMCALL:
         {
             if (sp < 1)
             {
@@ -180,10 +257,12 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                 sp--;
                 rt->write(stack[sp], "Hello, world!\n", 14);
             }
+            break;
         }
-        else
-        {
+
+        default:
             rt->error("invalid opcode");
+            break;
             return 1;
         }
     }
