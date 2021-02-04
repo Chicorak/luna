@@ -98,19 +98,18 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
     int csp = 0; /* Call Stack Pointer */
     int hsp = 0; /* Hardware Stack Pointer */
 
-    long cstack[65536]; /* Call Stack */
-    byte_t vstack[65536]; /* Virtual Stack */
-    struct hstack_value hstack[65536]; /* Hardware Stack */
+    long cstack[64] = {0}; /* Call Stack */
+    byte_t vstack[64] = {0}; /* Virtual Stack */
+    struct hstack_value hstack[64] = { { .size = 8, .value = 0 } }; /* Hardware Stack */
 
     /* General Purpose Registers */
     long registers[16];
 
     while (pc < header->count)
     {
-        byte_t upper = program[pc];
-        byte_t lower = program[pc + 1];
+        byte_t byte = program[pc];
 
-        switch (upper)
+        switch (byte)
         {
             case NOP:
             {
@@ -118,6 +117,8 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
             }
             case MOVB:
             {
+                byte_t lower = program[pc + 1];
+
                 switch (lower)
                 {
                     case MOV1:
@@ -197,6 +198,8 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
             }
             case MOVW:
             {
+                byte_t lower = program[pc + 1];
+
                 switch (lower)
                 {
                     case MOV1:
@@ -274,84 +277,91 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
                 break;
             }
-            case PUSH:
+            case PUSHB:
             {
-                switch (lower)
-                {
-                    case PUSHB:
-                    {
-                        hstack[hsp].size = 1;
-                        hstack[hsp].value = program[pc + 2];
+                hstack[hsp].size = 1;
+                hstack[hsp].value = program[pc + 1];
 
-                        hsp += 1;
-                        pc += 2;
-
-                        break;
-                    }
-                    case PUSHW:
-                    {
-                        hstack[hsp].size = 2;
-                        hstack[hsp].value = *((short *)&program[pc + 2]);
-
-                        hsp += 1;
-                        pc += 3;
-
-                        break;
-                    }
-                    case PUSHD:
-                    {
-                        hstack[hsp].size = 4;
-                        hstack[hsp].value = *((int *)&program[pc + 2]);
-
-                        hsp += 1;
-                        pc += 5;
-
-                        break;
-                    }
-                    case PUSHQ:
-                    {
-                        hstack[hsp].size = 8;
-                        hstack[hsp].value = *((long *)&program[pc + 2]);
-
-                        hsp += 1;
-                        pc += 9;
-
-                        break;
-                    }
-                    case PUSHR:
-                    {
-                        hstack[hsp].size = 8;
-                        hstack[hsp].value = registers[program[pc + 2]];
-
-                        hsp += 1;
-                        pc += 2;
-
-                        break;
-                    }
-                    default:
-                    {
-                        rt->error(UNSUPPORTED_OPCODE, "unsupported push type");
-                        break;
-                    }
-                }
+                hsp++;
+                pc++;
 
                 break;
             }
-            case POP:
+            case PUSHW:
+            {
+                hstack[hsp].size = 2;
+                hstack[hsp].value = *((short *)&program[pc + 1]);
+
+                hsp += 1;
+                pc += 2;
+
+                break;
+            }
+            case PUSHD:
+            {
+                hstack[hsp].size = 4;
+                hstack[hsp].value = *((int *)&program[pc + 1]);
+
+                hsp += 1;
+                pc += 4;
+
+                break;
+            }
+            case PUSHQ:
+            {
+                hstack[hsp].size = 8;
+                hstack[hsp].value = *((long *)&program[pc + 1]);
+
+                hsp += 1;
+                pc += 8;
+
+                break;
+            }
+            case PUSHR:
+            {
+                hstack[hsp].size = 8;
+                hstack[hsp].value = registers[program[pc + 1]];
+
+                hsp++;
+                pc++;
+
+                break;
+            }
+            case POPV:
             {
                 hsp--;
-
-                if (lower == POPR)
-                {
-                    registers[program[pc + 2]] = hstack[hsp].value;
-                    pc++;
-                }
+                break;
+            }
+            case POPR:
+            {
+                registers[program[pc + 1]] = hstack[hsp].value;
+                pc++;
 
                 break;
             }
             case JMP:
             {
-                pc = *((long *)&program[pc + 2]);
+                pc = *((long *)&program[pc + 1]);
+
+                continue;
+            }
+            case JE:
+            {
+                long val1 = hstack[hsp - 1].value;
+                long val2 = hstack[hsp - 2].value;
+
+                if(val1 == val2) pc = *((long *)&program[pc + 1]);
+                else pc += 8;
+
+                continue;
+            }
+            case JNE:
+            {
+                long val1 = hstack[hsp - 1].value;
+                long val2 = hstack[hsp - 2].value;
+
+                if(val1 != val2) pc = *((long *)&program[pc + 1]);
+                else pc += 8;
 
                 continue;
             }
@@ -366,13 +376,76 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
             }
             case RET:
             {
+                if(csp == 0) goto exit;
+
                 csp--;
                 pc = cstack[csp];
 
                 continue;
             }
+            case ADD:
+            {
+                long val1 = hstack[hsp - 1].value;
+                long val2 = hstack[hsp - 2].value;
+
+                hsp -= 2;
+
+                hstack[hsp].size = 8;
+                hstack[hsp].value = val1 + val2;
+
+                break;
+            }
+            case SUB:
+            {
+                long val1 = hstack[hsp - 1].value;
+                long val2 = hstack[hsp - 2].value;
+
+                hsp -= 2;
+
+                hstack[hsp].size = 8;
+                hstack[hsp].value = val1 - val2;
+
+                break;
+            }
+            case MUL:
+            {
+                long val1 = hstack[hsp - 1].value;
+                long val2 = hstack[hsp - 2].value;
+
+                hsp -= 2;
+
+                hstack[hsp].size = 8;
+                hstack[hsp].value = val1 * val2;
+
+                break;
+            }
+            case DIV:
+            {
+                long val1 = hstack[hsp - 1].value;
+                long val2 = hstack[hsp - 2].value;
+
+                hsp -= 2;
+
+                hstack[hsp].size = 8;
+                hstack[hsp].value = val1 / val2;
+
+                break;
+            }
+            case MOD:
+            {
+                long val1 = hstack[hsp - 1].value;
+                long val2 = hstack[hsp - 2].value;
+
+                hsp -= 2;
+
+                hstack[hsp].size = 8;
+                hstack[hsp].value = val1 % val2;
+
+                break;
+            }
             default:
             {
+                printf("0x%x\n", byte);
                 rt->error(INVALID_OPCODE, "invalid opcode");
                 break;
             }
@@ -381,5 +454,6 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
         pc++;
     }
 
+    exit:
     return hstack[hsp - 1].value;
 }

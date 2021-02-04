@@ -48,13 +48,14 @@ enum opcode
     SUB   = 18, /* Subtract two values on h-stack and push result to h-stack */
     MUL   = 19, /* Multiply two values on h-stack and push result to h-stack */
     DIV   = 20, /* Divide two values on h-stack and push result to h-stack */
-    INC   = 21, /* Increment register value by 1 */
-    DEC   = 22, /* Increment register value by 1 */
-    AND   = 23, /* Logical AND Instruction */
-    OR    = 24, /* Logical OR Instruction */
-    XOR   = 25, /* Logical XOR Instruction */
-    TEST  = 26, /* Logical TEST Instruction */
-    NOT   = 27, /* Logical NOT Instruction */
+    MOD   = 21, /* Divide two values on h-stack and push remainder result to h-stack */
+    INC   = 22, /* Increment register value by 1 */
+    DEC   = 23, /* Increment register value by 1 */
+    AND   = 24, /* Logical AND Instruction */
+    OR    = 25, /* Logical OR Instruction */
+    XOR   = 26, /* Logical XOR Instruction */
+    TEST  = 27, /* Logical TEST Instruction */
+    NOT   = 28, /* Logical NOT Instruction */
     INT   = 255, /* Call a VM interrupt/syscall */
 
     /* Lower Opcodes */
@@ -69,7 +70,8 @@ enum opcode
 enum exception
 {
     INVALID_OPCODE,
-    UNSUPPORTED_OPCODE
+    UNSUPPORTED_OPCODE,
+    INSUFFICIENT_ARGUMENTS
 };
 
 struct luna_header
