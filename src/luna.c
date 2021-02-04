@@ -23,16 +23,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-char *keywords[] =
-    {
-        "import ", "break ", "case ",
-        "char ", "const ", "continue ",
-        "default ", "double ", "else ",
-        "enum ", "float ", "loop ",
-        "if ", "int ", "long ",
-        "return ", "short ", "struct ",
-        "switch ", "alias ", "unsigned ",
-        "volatile ", "while ", NULL};
+
+struct hstack_value
+{
+    int size;
+    long value;
+};
 
 char *luna_compile(char *code)
 {
@@ -49,35 +45,35 @@ char *luna_compile(char *code)
 
         switch (c)
         {
-        case '!':
-        case '#':
-        case '%':
-        case '^':
-        case '&':
-        case '*':
-        case '(':
-        case ')':
-        case '-':
-        case '+':
-        case '=':
-        case '{':
-        case '}':
-        case '[':
-        case ']':
-        case ':':
-        case ';':
-        case '\"':
-        case '\'':
-        case '<':
-        case '>':
-        case ',':
-        case '.':
-        case '?':
-        case '|':
-        case '\\':
-        {
-            break;
-        }
+            case '!':
+            case '#':
+            case '%':
+            case '^':
+            case '&':
+            case '*':
+            case '(':
+            case ')':
+            case '-':
+            case '+':
+            case '=':
+            case '{':
+            case '}':
+            case '[':
+            case ']':
+            case ':':
+            case ';':
+            case '\"':
+            case '\'':
+            case '<':
+            case '>':
+            case ',':
+            case '.':
+            case '?':
+            case '|':
+            case '\\':
+            {
+                break;
+            }
         }
 
         storage[index] = c;
@@ -92,180 +88,301 @@ byte_t *luna_assemble(char *code, int options)
 
 int luna_execute(byte_t *program, struct luna_rt *rt)
 {
-    /* create a stack & call stack */
-    /* bytes will be in this format: first 4 bits are instruction, second 4 bits are argument (leading bytes can be args too) */
-    /* instructions
-     - push (0001) - push a value to stack
-     - pop (0010) - remove something off the top of the stack
-     - jmp (0011) - jump to a address specified by next byte and continue executing
-     - call (0100) - jump to address specified in next byte and store the previous location of call stack
-     - ret (0101) - return to most recent location stored on call stack, if there isnt any, exit program
-
-     operation instructions
-     - add (0110) - add the two top values on stack and push result onto stack
-     - sub (0111) - subtract the two top values on stack and push result onto stack
-     - mul (1000) - multiply the two top values on stack and push result onto stack
-     - div (1001) - divide the two top values on stack and push result onto stack
-     - mod (1010) - modulus the two top values on stack and push result onto stack
-    */
-
-    byte_t stack[1024]; /* represents the stack */
-    int sp = 0;         /* initial index of the stack pointer */
-
     struct luna_header *header = (struct luna_header *)program;
 
-    printf("Count: %d, Entry: %d\n", header->count, header->entry_point);
+    program += sizeof(struct luna_header);
 
-    int i;
-    for (i = 8 + header->entry_point; i < header->count + 8; i++)
+    /* Program Counter */
+    long pc = header->entry_point;
+
+    int csp = 0; /* Call Stack Pointer */
+    int hsp = 0; /* Hardware Stack Pointer */
+
+    long cstack[65536]; /* Call Stack */
+    byte_t vstack[65536]; /* Virtual Stack */
+    struct hstack_value hstack[65536]; /* Hardware Stack */
+
+    /* General Purpose Registers */
+    long registers[16];
+
+    while (pc < header->count)
     {
-        byte_t byte = program[i];
+        byte_t byte = program[pc];
 
-        switch (byte >> 4)
+        printf("0x%x\n", byte);
+
+        byte_t upper = byte >> 4;
+        byte_t lower = byte & 0x0F;
+
+        switch (upper)
         {
-
-        case PUSH:
-        {
-            byte = byte & 0x0F;
-
-            if (byte == 1)
+            case NOP:
             {
-                stack[sp] = program[i + 1]; /* Push the value to the stack */
-                sp++;
-
-                i++;
-
-                printf("PUSH %d\n", stack[sp - 1]);
+                break;
             }
-            else
+            case MOVB:
             {
-                rt->error("unsupported size for push");
-                return 1;
-            }
-            break;
-        }
-
-        /* Maths bytecodes */
-        case ADD:
-        {
-            if (sp < 2)
-            {
-                rt->error("ADD: two numbers needed");
-                return 1;
-            }
-
-            /* Add the two top values of the stack and push the result to the stack */
-            int a = stack[sp - 1];
-            int b = stack[sp - 2];
-            sp -= 2;
-
-            stack[sp] = a + b;
-            sp++;
-
-            printf("ADD(%d,%d) = %d\n", a, b, stack[sp - 1]);
-            break;
-        }
-
-        case SUB:
-        {
-            if (sp < 2)
-            {
-                rt->error("SUB: two numbers needed");
-                return 1;
-            }
-
-            /* Substract the two top values of the stack and push the result to the stack */
-
-            int a = stack[sp - 1];
-            int b = stack[sp - 2];
-
-            sp -= 2;
-
-            stack[sp] = a - b;
-            sp++;
-
-            printf("SUB(%d,%d) = %d\n", a, b, stack[sp - 1]);
-
-	    break;
-        }
-
-        case MUL:
-        {
-            if (sp < 2)
-            {
-                rt->error("MUL: two numbers needed");
-                return 1;
-            }
-
-            /* Multiply the two top values of the stack and push the result to the stack */
-
-            int a = stack[sp - 1];
-            int b = stack[sp - 2];
-
-            sp -= 2;
-
-            stack[sp] = a * b;
-            sp++;
-
-            printf("MUL(%d,%d) = %d\n", a, b, stack[sp - 1]);
-
-	    break;
-        }
-
-        case DIV:
-        {
-            if (sp < 2)
-            {
-                rt->error("DIV: two numbers needed");
-                return 1;
-            }
-
-            /* Divide the two top values of the stack and push the result to the stack */
-
-            int a = stack[sp - 1];
-            int b = stack[sp - 2];
-
-            sp -= 2;
-
-            stack[sp] = a / b;
-            sp++;
-
-            printf("DIV(%d,%d) = %d\n", a, b, stack[sp - 1]);
-
-	    break;
-        }
-	
-        case VMCALL:
-        {
-            if (sp < 1)
-            {
-                rt->error("vmcall id needed");
-                return 1;
-            }
-
-            sp--;
-            int vmcode = stack[sp];
-
-            if (vmcode == 1)
-            {
-                if (sp < 1)
+                switch (lower)
                 {
-                    rt->error("vmcall needs argument");
-                    return 1;
+                    case MOV1:
+                    {
+                        byte_t dest = program[pc + 1];
+                        byte_t src = program[pc + 2];
+
+                        pc += 2;
+
+                        registers[dest] = src;
+
+                        break;
+                    }
+                    case MOV2:
+                    {
+                        byte_t dest = program[pc + 1];
+                        byte_t src = program[pc + 2];
+
+                        pc += 2;
+
+                        registers[dest] = registers[src];
+
+                        break;
+                    }
+                    case MOV3:
+                    {
+                        byte_t dest = program[pc + 1];
+                        byte_t src = vstack[*((int *)&program[pc + 2])];
+
+                        pc += 5;
+
+                        registers[dest] = src;
+
+                        break;
+                    }
+                    case MOV4:
+                    {
+                        int dest = *((int *)&program[pc + 1]);
+                        byte_t src = program[pc + 4];
+
+                        pc += 5;
+
+                        vstack[dest] = src;
+
+                        break;
+                    }
+                    case MOV5:
+                    {
+                        int dest = *((int *)&program[pc + 1]);
+                        byte_t src = registers[pc + 4];
+
+                        pc += 5;
+
+                        vstack[dest] = src;
+
+                        break;
+                    }
+                    case MOV6:
+                    {
+                        int dest = *((int *)&program[pc + 1]);
+                        int src = *((int *)&program[pc + 4]);
+
+                        pc += 8;
+
+                        vstack[dest] = vstack[src];
+
+                        break;
+                    }
+                    default:
+                    {
+                        rt->error(UNSUPPORTED_OPCODE, "unsupported movw type");
+                        break;
+                    }
                 }
 
-                sp--;
-                rt->write(stack[sp], "Hello, world!\n", 14);
+                break;
             }
-            break;
+            case MOVW:
+            {
+                switch (lower)
+                {
+                    case MOV1:
+                    {
+                        byte_t dest = program[pc + 1];
+                        short src = *((short *)&program[pc + 2]);
+
+                        pc += 3;
+
+                        registers[dest] = src;
+
+                        break;
+                    }
+                    case MOV2:
+                    {
+                        byte_t dest = program[pc + 1];
+                        byte_t src = program[pc + 2];
+
+                        pc += 2;
+
+                        registers[dest] = registers[src];
+
+                        break;
+                    }
+                    case MOV3:
+                    {
+                        byte_t dest = program[pc + 1];
+                        short src = *((short *)&vstack[*((int *)&program[pc + 2])]);
+
+                        pc += 5;
+
+                        registers[dest] = src;
+
+                        break;
+                    }
+                    case MOV4:
+                    {
+                        int dest = *((int *)&program[pc + 1]);
+                        short src = *((short *)&program[pc + 4]);
+
+                        pc += 6;
+
+                        *((short *)&vstack[dest]) = src;
+
+                        break;
+                    }
+                    case MOV5:
+                    {
+                        int dest = *((int *)&program[pc + 1]);
+                        short src = (short)registers[pc + 4];
+
+                        pc += 5;
+
+                        *((short *)&vstack[dest]) = src;
+
+                        break;
+                    }
+                    case MOV6:
+                    {
+                        int dest = *((int *)&program[pc + 1]);
+                        int src = *((int *)&program[pc + 4]);
+
+                        pc += 8;
+
+                        *((short *)&vstack[dest]) = *((short *)&vstack[src]);
+
+                        break;
+                    }
+                    default:
+                    {
+                        rt->error(UNSUPPORTED_OPCODE, "unsupported movw type");
+                        break;
+                    }
+                }
+
+                break;
+            }
+            case PUSH:
+            {
+                switch (lower)
+                {
+                    case PUSHB:
+                    {
+                        hstack[hsp].size = 1;
+                        hstack[hsp].value = program[pc + 1];
+
+                        hsp++;
+                        pc++;
+
+                        break;
+                    }
+                    case PUSHW:
+                    {
+                        hstack[hsp].size = 2;
+                        hstack[hsp].value = *((short *)&program[pc + 1]);
+
+                        hsp += 1;
+                        pc += 2;
+
+                        break;
+                    }
+                    case PUSHD:
+                    {
+                        hstack[hsp].size = 4;
+                        hstack[hsp].value = *((int *)&program[pc + 1]);
+
+                        hsp += 1;
+                        pc += 4;
+
+                        break;
+                    }
+                    case PUSHQ:
+                    {
+                        hstack[hsp].size = 8;
+                        hstack[hsp].value = *((long *)&program[pc + 1]);
+
+                        hsp += 1;
+                        pc += 8;
+
+                        break;
+                    }
+                    case PUSHR:
+                    {
+                        hstack[hsp].size = 8;
+                        hstack[hsp].value = registers[program[pc + 1]];
+
+                        hsp++;
+                        pc++;
+
+                        break;
+                    }
+                    default:
+                    {
+                        rt->error(UNSUPPORTED_OPCODE, "unsupported push type");
+                        break;
+                    }
+                }
+
+                break;
+            }
+            case POP:
+            {
+                hsp--;
+
+                if (lower == POPR)
+                {
+                    registers[program[pc + 1]] = hstack[hsp].value;
+                }
+
+                break;
+            }
+            case JMP:
+            {
+                pc = *((long *)&program[pc + 1]);
+
+                continue;
+            }
+            case CALL:
+            {
+                cstack[csp] = pc;
+                csp++;
+
+                pc = sizeof(struct luna_header) + *((long *)&program[pc + 1]);
+
+                continue;
+            }
+            case RET:
+            {
+                csp--;
+                pc = cstack[csp];
+
+                continue;
+            }
+            default:
+            {
+                rt->error(INVALID_OPCODE, "invalid opcode");
+                break;
+            }
         }
 
-        default:
-            rt->error("invalid opcode");
-            break;
-            return 1;
-        }
+        pc++;
     }
 
-    return stack[sp - 1];
+    return hstack[hsp - 1].value;
 }

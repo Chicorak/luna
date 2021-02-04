@@ -23,39 +23,41 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void luna_error(char *msg) { printf("luna: error: %s\n", msg); }
-int luna_read(int fd, void *buf, int cnt) { return read(fd, buf, cnt); }
-int luna_write(int fd, void *buf, int cnt) { return write(fd, buf, cnt); }
+void luna_error(int ecode, char *msg) { printf("luna: error: (%d) %s\n", ecode, msg); }
 
 int main(int argc, char **argv)
 {
     struct luna_rt rt;
 
-    rt.argc = 0;
-    rt.argv = NULL;
     rt.error = luna_error;
-    rt.read = luna_read;
-    rt.write = luna_write;
+
+    /* Read VM Call */
+    rt.vmcalls[0].params = 3;
+    rt.vmcalls[0].vmcall = (void (*)())read;
+
+    /* Write VM Call */
+    rt.vmcalls[1].params = 3;
+    rt.vmcalls[1].vmcall = (void (*)())write;
 
     char bytes[] = {
-        0b00001010,
-        0b00000000,
-        0b00000000,
-        0b00000000,
-        0b00000000,
-        0b00000000,
-        0b00000000,
-        0b00000000,
-        0b00010001, /* PUSH */
-        0b00000001,
-        0b00010001, /* PUSH */
-        0b00000001,
+        9,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
         0b01110000,
-        0b00010001, /* PUSH */
-        0b00000001,
-        0b11110000,
-        0b00010001,
-        0b00000000};
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+    };
 
     printf("luna: info: program exit code was %d\n", luna_execute(bytes, &rt));
 }

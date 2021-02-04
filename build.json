@@ -1,0 +1,18 @@
+{
+	"cc": "gcc",
+	"src": "src/*.c",
+	"output": "luna",
+	
+	"#default": "debug",
+	
+	"debug": [
+		"echo Building debug for #(os)...",
+		"#(cc) -o #(output) #(src) -g -Og",
+		"echo Done!"
+	],
+	"release": [
+		"echo Building release for #(os)...",
+		"#(cc) -o #(output) #(src) -s -Os",
+		"echo Done!"
+	]
+}
