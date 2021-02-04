@@ -107,12 +107,8 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
     while (pc < header->count)
     {
-        byte_t byte = program[pc];
-
-        printf("0x%x\n", byte);
-
-        byte_t upper = byte >> 4;
-        byte_t lower = byte & 0x0F;
+        byte_t upper = program[pc];
+        byte_t lower = program[pc + 1];
 
         switch (upper)
         {
@@ -126,10 +122,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                 {
                     case MOV1:
                     {
-                        byte_t dest = program[pc + 1];
-                        byte_t src = program[pc + 2];
+                        byte_t dest = program[pc + 2];
+                        byte_t src = program[pc + 3];
 
-                        pc += 2;
+                        pc += 3;
 
                         registers[dest] = src;
 
@@ -137,10 +133,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV2:
                     {
-                        byte_t dest = program[pc + 1];
-                        byte_t src = program[pc + 2];
+                        byte_t dest = program[pc + 2];
+                        byte_t src = program[pc + 3];
 
-                        pc += 2;
+                        pc += 3;
 
                         registers[dest] = registers[src];
 
@@ -148,10 +144,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV3:
                     {
-                        byte_t dest = program[pc + 1];
-                        byte_t src = vstack[*((int *)&program[pc + 2])];
+                        byte_t dest = program[pc + 2];
+                        byte_t src = vstack[*((int *)&program[pc + 3])];
 
-                        pc += 5;
+                        pc += 6;
 
                         registers[dest] = src;
 
@@ -159,10 +155,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV4:
                     {
-                        int dest = *((int *)&program[pc + 1]);
-                        byte_t src = program[pc + 4];
+                        int dest = *((int *)&program[pc + 2]);
+                        byte_t src = program[pc + 5];
 
-                        pc += 5;
+                        pc += 6;
 
                         vstack[dest] = src;
 
@@ -170,10 +166,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV5:
                     {
-                        int dest = *((int *)&program[pc + 1]);
-                        byte_t src = registers[pc + 4];
+                        int dest = *((int *)&program[pc + 2]);
+                        byte_t src = registers[pc + 5];
 
-                        pc += 5;
+                        pc += 6;
 
                         vstack[dest] = src;
 
@@ -181,10 +177,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV6:
                     {
-                        int dest = *((int *)&program[pc + 1]);
-                        int src = *((int *)&program[pc + 4]);
+                        int dest = *((int *)&program[pc + 2]);
+                        int src = *((int *)&program[pc + 5]);
 
-                        pc += 8;
+                        pc += 9;
 
                         vstack[dest] = vstack[src];
 
@@ -205,10 +201,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                 {
                     case MOV1:
                     {
-                        byte_t dest = program[pc + 1];
-                        short src = *((short *)&program[pc + 2]);
+                        byte_t dest = program[pc + 2];
+                        short src = *((short *)&program[pc + 3]);
 
-                        pc += 3;
+                        pc += 4;
 
                         registers[dest] = src;
 
@@ -216,10 +212,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV2:
                     {
-                        byte_t dest = program[pc + 1];
-                        byte_t src = program[pc + 2];
+                        byte_t dest = program[pc + 2];
+                        byte_t src = program[pc + 3];
 
-                        pc += 2;
+                        pc += 3;
 
                         registers[dest] = registers[src];
 
@@ -227,10 +223,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV3:
                     {
-                        byte_t dest = program[pc + 1];
-                        short src = *((short *)&vstack[*((int *)&program[pc + 2])]);
+                        byte_t dest = program[pc + 2];
+                        short src = *((short *)&vstack[*((int *)&program[pc + 3])]);
 
-                        pc += 5;
+                        pc += 6;
 
                         registers[dest] = src;
 
@@ -238,10 +234,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV4:
                     {
-                        int dest = *((int *)&program[pc + 1]);
-                        short src = *((short *)&program[pc + 4]);
+                        int dest = *((int *)&program[pc + 2]);
+                        short src = *((short *)&program[pc + 5]);
 
-                        pc += 6;
+                        pc += 7;
 
                         *((short *)&vstack[dest]) = src;
 
@@ -249,10 +245,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV5:
                     {
-                        int dest = *((int *)&program[pc + 1]);
-                        short src = (short)registers[pc + 4];
+                        int dest = *((int *)&program[pc + 3]);
+                        short src = (short)registers[pc + 5];
 
-                        pc += 5;
+                        pc += 6;
 
                         *((short *)&vstack[dest]) = src;
 
@@ -260,10 +256,10 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     }
                     case MOV6:
                     {
-                        int dest = *((int *)&program[pc + 1]);
-                        int src = *((int *)&program[pc + 4]);
+                        int dest = *((int *)&program[pc + 3]);
+                        int src = *((int *)&program[pc + 6]);
 
-                        pc += 8;
+                        pc += 9;
 
                         *((short *)&vstack[dest]) = *((short *)&vstack[src]);
 
@@ -285,50 +281,50 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                     case PUSHB:
                     {
                         hstack[hsp].size = 1;
-                        hstack[hsp].value = program[pc + 1];
-
-                        hsp++;
-                        pc++;
-
-                        break;
-                    }
-                    case PUSHW:
-                    {
-                        hstack[hsp].size = 2;
-                        hstack[hsp].value = *((short *)&program[pc + 1]);
+                        hstack[hsp].value = program[pc + 2];
 
                         hsp += 1;
                         pc += 2;
 
                         break;
                     }
+                    case PUSHW:
+                    {
+                        hstack[hsp].size = 2;
+                        hstack[hsp].value = *((short *)&program[pc + 2]);
+
+                        hsp += 1;
+                        pc += 3;
+
+                        break;
+                    }
                     case PUSHD:
                     {
                         hstack[hsp].size = 4;
-                        hstack[hsp].value = *((int *)&program[pc + 1]);
+                        hstack[hsp].value = *((int *)&program[pc + 2]);
 
                         hsp += 1;
-                        pc += 4;
+                        pc += 5;
 
                         break;
                     }
                     case PUSHQ:
                     {
                         hstack[hsp].size = 8;
-                        hstack[hsp].value = *((long *)&program[pc + 1]);
+                        hstack[hsp].value = *((long *)&program[pc + 2]);
 
                         hsp += 1;
-                        pc += 8;
+                        pc += 9;
 
                         break;
                     }
                     case PUSHR:
                     {
                         hstack[hsp].size = 8;
-                        hstack[hsp].value = registers[program[pc + 1]];
+                        hstack[hsp].value = registers[program[pc + 2]];
 
-                        hsp++;
-                        pc++;
+                        hsp += 1;
+                        pc += 2;
 
                         break;
                     }
@@ -347,14 +343,15 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
                 if (lower == POPR)
                 {
-                    registers[program[pc + 1]] = hstack[hsp].value;
+                    registers[program[pc + 2]] = hstack[hsp].value;
+                    pc++;
                 }
 
                 break;
             }
             case JMP:
             {
-                pc = *((long *)&program[pc + 1]);
+                pc = *((long *)&program[pc + 2]);
 
                 continue;
             }
@@ -363,7 +360,7 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
                 cstack[csp] = pc;
                 csp++;
 
-                pc = sizeof(struct luna_header) + *((long *)&program[pc + 1]);
+                pc = sizeof(struct luna_header) + *((long *)&program[pc + 2]);
 
                 continue;
             }

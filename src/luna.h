@@ -27,37 +27,43 @@ typedef unsigned char byte_t;
 enum opcode
 {
     /* Upper Opcodes */
-    NOP   = 0b0000, /* No Instruction */
-    MOVB  = 0b0001, /* Move BYTE  (1 byte)  */
-    MOVW  = 0b0010, /* Move WORD  (2 bytes) */
-    MOVD  = 0b0011, /* Move DWORD (4 bytes) */
-    MOVQ  = 0b0100, /* Move QWORD (8 bytes) */
-    PUSH  = 0b0101, /* Push to h-stack */
-    POP   = 0b0110, /* Pop from h-stack */
-    JMP   = 0b0111, /* Jump to address */
-    CALL  = 0b1000, /* Call subroutine at address */
-    RET   = 0b1001, /* Return from subroutine to address on call-stack */
-    ADD   = 0b1010, /* Add two values on h-stack and push result to h-stack */
-    SUB   = 0b1011, /* Subtract two values on h-stack and push result to h-stack */
-    MUL   = 0b1100, /* Multiply two values on h-stack and push result to h-stack */
-    DIV   = 0b1101, /* Divide two values on h-stack and push result to h-stack */
-    MOD   = 0b1110, /* Divide two values on h-stack and push remainder result to h-stack */
-    INT   = 0b1111, /* Call a VM interrupt/syscall */
+    NOP   = 0, /* No Instruction  */
+    MOVB  = 1, /* Move BYTE  (1 byte)  */
+    MOVW  = 2, /* Move WORD  (2 bytes) */
+    MOVD  = 3, /* Move DWORD (4 bytes) */
+    MOVQ  = 4, /* Move QWORD (8 bytes) */
+    PUSHB = 5, /* Push 1 byte to h-stack */
+    PUSHW = 6, /* Push 1 byte to h-stack */
+    PUSHD = 7, /* Push 1 byte to h-stack */
+    PUSHQ = 8, /* Push 1 byte to h-stack */
+    PUSHR = 9, /* Push 1 byte to h-stack */
+    POPV  = 10, /* Pop from h-stack */
+    POPR  = 11, /* Pop from h-stack and store in register */
+    JMP   = 12, /* Jump to address */
+    JE    = 13, /* Jump to address if two values on stack are equal */
+    JNE   = 14, /* Jump to address if two values on stack are not equal */
+    CALL  = 15, /* Call subroutine at address */
+    RET   = 16, /* Return from subroutine to address on call-stack */
+    ADD   = 17, /* Add two values on h-stack and push result to h-stack */
+    SUB   = 18, /* Subtract two values on h-stack and push result to h-stack */
+    MUL   = 19, /* Multiply two values on h-stack and push result to h-stack */
+    DIV   = 20, /* Divide two values on h-stack and push result to h-stack */
+    INC   = 21, /* Increment register value by 1 */
+    DEC   = 22, /* Increment register value by 1 */
+    AND   = 23, /* Logical AND Instruction */
+    OR    = 24, /* Logical OR Instruction */
+    XOR   = 25, /* Logical XOR Instruction */
+    TEST  = 26, /* Logical TEST Instruction */
+    NOT   = 27, /* Logical NOT Instruction */
+    INT   = 255, /* Call a VM interrupt/syscall */
 
     /* Lower Opcodes */
-    MOV1  = 0b0001, /* MOV: Dest (Register) Src (Value) */
-    MOV2  = 0b0011, /* MOV: Dest (Register) Src (Register) */
-    MOV3  = 0b0010, /* MOV: Dest (Register) Src (Value At Address) */
-    MOV4  = 0b0100, /* MOV: Dest (Address) Src (Value) */
-    MOV5  = 0b0110, /* MOV: Dest (Address) Src (Register) */
-    MOV6  = 0b0101, /* MOV: Dest (Address) Src (Value At Address) */
-    PUSHB = 0b0001, /* PUSH: BYTE     (1 byte)  */
-    PUSHW = 0b0010, /* PUSH: WORD     (2 bytes) */
-    PUSHD = 0b0011, /* PUSH: DWORD    (4 bytes) */
-    PUSHQ = 0b0100, /* PUSH: QWORD    (8 bytes) */
-    PUSHR = 0b0101, /* PUSH: REGISTER (8 bytes) */
-    POPV  = 0b0000, /* POP:  VOID     (0 bytes)  */
-    POPR  = 0b0001, /* POP:  REGISTER (8 bytes)  */
+    MOV1  = 1, /* MOV: Dest (Register) Src (Value) */
+    MOV2  = 2, /* MOV: Dest (Register) Src (Register) */
+    MOV3  = 3, /* MOV: Dest (Register) Src (Value At Address) */
+    MOV4  = 4, /* MOV: Dest (Address) Src (Value) */
+    MOV5  = 5, /* MOV: Dest (Address) Src (Register) */
+    MOV6  = 6, /* MOV: Dest (Address) Src (Value At Address) */
 };
 
 enum exception
