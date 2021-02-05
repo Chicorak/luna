@@ -33,10 +33,10 @@ enum opcode
     MOVD  = 3, /* Move DWORD (4 bytes) */
     MOVQ  = 4, /* Move QWORD (8 bytes) */
     PUSHB = 5, /* Push 1 byte to h-stack */
-    PUSHW = 6, /* Push 1 byte to h-stack */
-    PUSHD = 7, /* Push 1 byte to h-stack */
-    PUSHQ = 8, /* Push 1 byte to h-stack */
-    PUSHR = 9, /* Push 1 byte to h-stack */
+    PUSHW = 6, /* Push 2 bytes to h-stack */
+    PUSHD = 7, /* Push 4 bytes to h-stack */
+    PUSHQ = 8, /* Push 8 bytes to h-stack */
+    PUSHR = 9, /* Push register value to h-stack */
     POPV  = 10, /* Pop from h-stack */
     POPR  = 11, /* Pop from h-stack and store in register */
     JMP   = 12, /* Jump to address */
@@ -50,7 +50,7 @@ enum opcode
     DIV   = 20, /* Divide two values on h-stack and push result to h-stack */
     MOD   = 21, /* Divide two values on h-stack and push remainder result to h-stack */
     INC   = 22, /* Increment register value by 1 */
-    DEC   = 23, /* Increment register value by 1 */
+    DEC   = 23, /* Decrement register value by 1 */
     AND   = 24, /* Logical AND Instruction */
     OR    = 25, /* Logical OR Instruction */
     XOR   = 26, /* Logical XOR Instruction */

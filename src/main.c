@@ -63,7 +63,7 @@ int main(int argc, char **argv)
         255,
         255,
         255,
-        0,
+        50,
         JNE,
         0,
         0,

@@ -1,5 +1,57 @@
 import luna.io;
 
+group Animal {
+    int age;
+
+    public fun Make(int age) {
+        Animal animal;
+        animal.age = age;
+
+        return animal;
+    }
+}
+
+group Dog inherits Animal {
+    string breed;
+
+    public fun Make(int age, string breed) {
+        Dog dog;
+        dog.age = age;
+        dog.breed = breed;
+
+        return dog;
+    }
+}
+
 fun main() {
-    write(1, "Hello, world!\n", 14);
+    println("Hello, world!");
+
+    Dog dog = Dog.Make(2, "Poodle");
+
+    a = 0;
+
+    loop a: 0...10 { // not officially decided yet
+
+    }
+
+    loop true {
+
+    }
+
+    loop a >= 0 {
+
+    }
+
+    if a == 0 {
+
+    }
+
+    if(a == 0) {
+
+    }
+
+    int b = 34;
+
+    string x = "hello";
+    y = "goodbye";
 }
