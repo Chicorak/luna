@@ -7,7 +7,7 @@
 	
 	"debug": [
 		"echo Building debug for #(os)...",
-		"#(cc) -o #(output) #(src) -g -Og",
+		"#(cc) -ansi -Wall -o #(output) #(src) -g -Og",
 		"echo Done!"
 	],
 	"release": [
