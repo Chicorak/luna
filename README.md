@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to luna</h1>
+<img src="/assets/logo.png" align="center">
 <p>
   <a href="https://github.com/Fossbay/luna/wiki" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
