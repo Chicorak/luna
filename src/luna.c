@@ -45,35 +45,35 @@ char *luna_compile(char *code)
 
         switch (c)
         {
-            case '!':
-            case '#':
-            case '%':
-            case '^':
-            case '&':
-            case '*':
-            case '(':
-            case ')':
-            case '-':
-            case '+':
-            case '=':
-            case '{':
-            case '}':
-            case '[':
-            case ']':
-            case ':':
-            case ';':
-            case '\"':
-            case '\'':
-            case '<':
-            case '>':
-            case ',':
-            case '.':
-            case '?':
-            case '|':
-            case '\\':
-            {
-                break;
-            }
+        case '!':
+        case '#':
+        case '%':
+        case '^':
+        case '&':
+        case '*':
+        case '(':
+        case ')':
+        case '-':
+        case '+':
+        case '=':
+        case '{':
+        case '}':
+        case '[':
+        case ']':
+        case ':':
+        case ';':
+        case '\"':
+        case '\'':
+        case '<':
+        case '>':
+        case ',':
+        case '.':
+        case '?':
+        case '|':
+        case '\\':
+        {
+            break;
+        }
         }
 
         storage[index] = c;
@@ -84,6 +84,138 @@ char *luna_compile(char *code)
 
 byte_t *luna_assemble(char *code, int options)
 {
+
+    char *token;
+    char **tokens = malloc(sizeof(char *));
+
+    byte_t *bytes = malloc(sizeof(byte_t *));
+
+    int bytes_index = 0;
+
+    char modifiable[64];
+
+    char sp[1024];
+
+    strcpy(modifiable, code);
+
+    int token_index = 0;
+
+    
+    token = strtok(modifiable, " ");
+
+    while (token != NULL)
+    {
+
+        tokens[token_index] = token;
+
+        token = strtok(NULL, " ");
+
+        token_index++;
+    }
+
+    
+    int i;
+
+    for (i = 0; i < token_index; i++)
+    {
+
+        /* Get instruction if needed */
+        size_t j = 0;
+        char *instruction = malloc(sizeof(char *));
+
+        char *sp_string = "sp";
+
+        while (j != strlen(tokens[i]) - 1)
+        {
+            instruction[j] = tokens[i][j];
+            j++;
+        }
+
+        /* mov */
+        if (strcmp(instruction, "mov") == 0)
+        {
+
+            if (tokens[i + 1] != sp_string || tokens[i + 2] != sp_string)
+            {
+                bytes[bytes_index + 2] = atoi(tokens[i + 1]);
+                bytes[bytes_index + 3] = atoi(tokens[i + 2]);
+            }
+
+            else
+            {
+	      
+            }
+            switch (tokens[i][strlen(tokens[i]) - 1])
+            {
+
+            case '1':
+
+                bytes[bytes_index] = 1;
+
+                bytes[bytes_index + 1] = 1;
+
+                bytes_index += 3;
+
+                break;
+
+            case '2':
+
+                bytes[bytes_index] = 1;
+
+                bytes[bytes_index + 1] = 2;
+
+                bytes_index += 3;
+
+                break;
+
+            case '3':
+
+                bytes[bytes_index] = 1;
+
+                bytes[bytes_index + 1] = 3;
+
+                bytes_index += 3;
+
+                break;
+
+            case '4':
+
+                bytes[bytes_index] = 1;
+
+                bytes[bytes_index + 1] = 4;
+
+                bytes_index += 3;
+
+                break;
+
+            case '5':
+
+                bytes[bytes_index] = 1;
+
+                bytes[bytes_index + 1] = 5;
+
+                bytes_index += 3;
+
+                break;
+
+            case '6':
+
+                bytes[bytes_index] = 1;
+
+                bytes[bytes_index + 1] = 6;
+
+                bytes_index += 3;
+
+                break;
+
+            default:
+                printf("Invalid mov instruction");
+                break;
+            }
+        }
+    }
+
+    return bytes;
 }
 
 int luna_execute(byte_t *program, struct luna_rt *rt)
@@ -98,9 +230,9 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
     int csp = 0; /* Call Stack Pointer */
     int hsp = 0; /* Hardware Stack Pointer */
 
-    long cstack[64] = {0}; /* Call Stack */
-    byte_t vstack[64] = {0}; /* Virtual Stack */
-    struct hstack_value hstack[64] = { { .size = 8, .value = 0 } }; /* Hardware Stack */
+    long cstack[64] = {0};                                      /* Call Stack */
+    byte_t vstack[64] = {0};                                    /* Virtual Stack */
+    struct hstack_value hstack[64] = {{.size = 8, .value = 0}}; /* Hardware Stack */
 
     /* General Purpose Registers */
     long registers[16];
@@ -111,349 +243,354 @@ int luna_execute(byte_t *program, struct luna_rt *rt)
 
         switch (byte)
         {
-            case NOP:
+        case NOP:
+        {
+            break;
+        }
+        case MOVB:
+        {
+            byte_t lower = program[pc + 1];
+
+            switch (lower)
             {
-                break;
-            }
-            case MOVB:
+            case MOV1:
             {
-                byte_t lower = program[pc + 1];
+                byte_t dest = program[pc + 2];
+                byte_t src = program[pc + 3];
 
-                switch (lower)
-                {
-                    case MOV1:
-                    {
-                        byte_t dest = program[pc + 2];
-                        byte_t src = program[pc + 3];
+                pc += 3;
 
-                        pc += 3;
-
-                        registers[dest] = src;
-
-                        break;
-                    }
-                    case MOV2:
-                    {
-                        byte_t dest = program[pc + 2];
-                        byte_t src = program[pc + 3];
-
-                        pc += 3;
-
-                        registers[dest] = registers[src];
-
-                        break;
-                    }
-                    case MOV3:
-                    {
-                        byte_t dest = program[pc + 2];
-                        byte_t src = vstack[*((int *)&program[pc + 3])];
-
-                        pc += 6;
-
-                        registers[dest] = src;
-
-                        break;
-                    }
-                    case MOV4:
-                    {
-                        int dest = *((int *)&program[pc + 2]);
-                        byte_t src = program[pc + 5];
-
-                        pc += 6;
-
-                        vstack[dest] = src;
-
-                        break;
-                    }
-                    case MOV5:
-                    {
-                        int dest = *((int *)&program[pc + 2]);
-                        byte_t src = registers[pc + 5];
-
-                        pc += 6;
-
-                        vstack[dest] = src;
-
-                        break;
-                    }
-                    case MOV6:
-                    {
-                        int dest = *((int *)&program[pc + 2]);
-                        int src = *((int *)&program[pc + 5]);
-
-                        pc += 9;
-
-                        vstack[dest] = vstack[src];
-
-                        break;
-                    }
-                    default:
-                    {
-                        rt->error(UNSUPPORTED_OPCODE, "unsupported movw type");
-                        break;
-                    }
-                }
+                registers[dest] = src;
 
                 break;
             }
-            case MOVW:
+            case MOV2:
             {
-                byte_t lower = program[pc + 1];
+                byte_t dest = program[pc + 2];
+                byte_t src = program[pc + 3];
 
-                switch (lower)
-                {
-                    case MOV1:
-                    {
-                        byte_t dest = program[pc + 2];
-                        short src = *((short *)&program[pc + 3]);
+                pc += 3;
 
-                        pc += 4;
-
-                        registers[dest] = src;
-
-                        break;
-                    }
-                    case MOV2:
-                    {
-                        byte_t dest = program[pc + 2];
-                        byte_t src = program[pc + 3];
-
-                        pc += 3;
-
-                        registers[dest] = registers[src];
-
-                        break;
-                    }
-                    case MOV3:
-                    {
-                        byte_t dest = program[pc + 2];
-                        short src = *((short *)&vstack[*((int *)&program[pc + 3])]);
-
-                        pc += 6;
-
-                        registers[dest] = src;
-
-                        break;
-                    }
-                    case MOV4:
-                    {
-                        int dest = *((int *)&program[pc + 2]);
-                        short src = *((short *)&program[pc + 5]);
-
-                        pc += 7;
-
-                        *((short *)&vstack[dest]) = src;
-
-                        break;
-                    }
-                    case MOV5:
-                    {
-                        int dest = *((int *)&program[pc + 3]);
-                        short src = (short)registers[pc + 5];
-
-                        pc += 6;
-
-                        *((short *)&vstack[dest]) = src;
-
-                        break;
-                    }
-                    case MOV6:
-                    {
-                        int dest = *((int *)&program[pc + 3]);
-                        int src = *((int *)&program[pc + 6]);
-
-                        pc += 9;
-
-                        *((short *)&vstack[dest]) = *((short *)&vstack[src]);
-
-                        break;
-                    }
-                    default:
-                    {
-                        rt->error(UNSUPPORTED_OPCODE, "unsupported movw type");
-                        break;
-                    }
-                }
+                registers[dest] = registers[src];
 
                 break;
             }
-            case PUSHB:
+            case MOV3:
             {
-                hstack[hsp].size = 1;
-                hstack[hsp].value = program[pc + 1];
+                byte_t dest = program[pc + 2];
+                byte_t src = vstack[*((int *)&program[pc + 3])];
 
-                hsp++;
-                pc++;
+                pc += 6;
+
+                registers[dest] = src;
 
                 break;
             }
-            case PUSHW:
+            case MOV4:
             {
-                hstack[hsp].size = 2;
-                hstack[hsp].value = *((short *)&program[pc + 1]);
+                int dest = *((int *)&program[pc + 2]);
+                byte_t src = program[pc + 5];
 
-                hsp += 1;
-                pc += 2;
+                pc += 6;
+
+                vstack[dest] = src;
 
                 break;
             }
-            case PUSHD:
+            case MOV5:
             {
-                hstack[hsp].size = 4;
-                hstack[hsp].value = *((int *)&program[pc + 1]);
+                int dest = *((int *)&program[pc + 2]);
+                byte_t src = registers[pc + 5];
 
-                hsp += 1;
-                pc += 4;
+                pc += 6;
+
+                vstack[dest] = src;
 
                 break;
             }
-            case PUSHQ:
+            case MOV6:
             {
-                hstack[hsp].size = 8;
-                hstack[hsp].value = *((long *)&program[pc + 1]);
+                int dest = *((int *)&program[pc + 2]);
+                int src = *((int *)&program[pc + 5]);
 
-                hsp += 1;
-                pc += 8;
+                pc += 9;
 
-                break;
-            }
-            case PUSHR:
-            {
-                hstack[hsp].size = 8;
-                hstack[hsp].value = registers[program[pc + 1]];
-
-                hsp++;
-                pc++;
-
-                break;
-            }
-            case POPV:
-            {
-                hsp--;
-                break;
-            }
-            case POPR:
-            {
-                registers[program[pc + 1]] = hstack[hsp].value;
-                pc++;
-
-                break;
-            }
-            case JMP:
-            {
-                pc = *((long *)&program[pc + 1]);
-
-                continue;
-            }
-            case JE:
-            {
-                long val1 = hstack[hsp - 1].value;
-                long val2 = hstack[hsp - 2].value;
-
-                if(val1 == val2) pc = *((long *)&program[pc + 1]);
-                else pc += 8;
-
-                continue;
-            }
-            case JNE:
-            {
-                long val1 = hstack[hsp - 1].value;
-                long val2 = hstack[hsp - 2].value;
-
-                if(val1 != val2) pc = *((long *)&program[pc + 1]);
-                else pc += 8;
-
-                continue;
-            }
-            case CALL:
-            {
-                cstack[csp] = pc;
-                csp++;
-
-                pc = sizeof(struct luna_header) + *((long *)&program[pc + 2]);
-
-                continue;
-            }
-            case RET:
-            {
-                if(csp == 0) goto exit;
-
-                csp--;
-                pc = cstack[csp];
-
-                continue;
-            }
-            case ADD:
-            {
-                long val1 = hstack[hsp - 1].value;
-                long val2 = hstack[hsp - 2].value;
-
-                hsp -= 2;
-
-                hstack[hsp].size = 8;
-                hstack[hsp].value = val1 + val2;
-
-                break;
-            }
-            case SUB:
-            {
-                long val1 = hstack[hsp - 1].value;
-                long val2 = hstack[hsp - 2].value;
-
-                hsp -= 2;
-
-                hstack[hsp].size = 8;
-                hstack[hsp].value = val1 - val2;
-
-                break;
-            }
-            case MUL:
-            {
-                long val1 = hstack[hsp - 1].value;
-                long val2 = hstack[hsp - 2].value;
-
-                hsp -= 2;
-
-                hstack[hsp].size = 8;
-                hstack[hsp].value = val1 * val2;
-
-                break;
-            }
-            case DIV:
-            {
-                long val1 = hstack[hsp - 1].value;
-                long val2 = hstack[hsp - 2].value;
-
-                hsp -= 2;
-
-                hstack[hsp].size = 8;
-                hstack[hsp].value = val1 / val2;
-
-                break;
-            }
-            case MOD:
-            {
-                long val1 = hstack[hsp - 1].value;
-                long val2 = hstack[hsp - 2].value;
-
-                hsp -= 2;
-
-                hstack[hsp].size = 8;
-                hstack[hsp].value = val1 % val2;
+                vstack[dest] = vstack[src];
 
                 break;
             }
             default:
             {
-                printf("0x%x\n", byte);
-                rt->error(INVALID_OPCODE, "invalid opcode");
+                rt->error(UNSUPPORTED_OPCODE, "unsupported movw type");
                 break;
             }
+            }
+
+            break;
+        }
+        case MOVW:
+        {
+            byte_t lower = program[pc + 1];
+
+            switch (lower)
+            {
+            case MOV1:
+            {
+                byte_t dest = program[pc + 2];
+                short src = *((short *)&program[pc + 3]);
+
+                pc += 4;
+
+                registers[dest] = src;
+
+                break;
+            }
+            case MOV2:
+            {
+                byte_t dest = program[pc + 2];
+                byte_t src = program[pc + 3];
+
+                pc += 3;
+
+                registers[dest] = registers[src];
+
+                break;
+            }
+            case MOV3:
+            {
+                byte_t dest = program[pc + 2];
+                short src = *((short *)&vstack[*((int *)&program[pc + 3])]);
+
+                pc += 6;
+
+                registers[dest] = src;
+
+                break;
+            }
+            case MOV4:
+            {
+                int dest = *((int *)&program[pc + 2]);
+                short src = *((short *)&program[pc + 5]);
+
+                pc += 7;
+
+                *((short *)&vstack[dest]) = src;
+
+                break;
+            }
+            case MOV5:
+            {
+                int dest = *((int *)&program[pc + 3]);
+                short src = (short)registers[pc + 5];
+
+                pc += 6;
+
+                *((short *)&vstack[dest]) = src;
+
+                break;
+            }
+            case MOV6:
+            {
+                int dest = *((int *)&program[pc + 3]);
+                int src = *((int *)&program[pc + 6]);
+
+                pc += 9;
+
+                *((short *)&vstack[dest]) = *((short *)&vstack[src]);
+
+                break;
+            }
+            default:
+            {
+                rt->error(UNSUPPORTED_OPCODE, "unsupported movw type");
+                break;
+            }
+            }
+
+            break;
+        }
+        case PUSHB:
+        {
+            hstack[hsp].size = 1;
+            hstack[hsp].value = program[pc + 1];
+
+            hsp++;
+            pc++;
+
+            break;
+        }
+        case PUSHW:
+        {
+            hstack[hsp].size = 2;
+            hstack[hsp].value = *((short *)&program[pc + 1]);
+
+            hsp += 1;
+            pc += 2;
+
+            break;
+        }
+        case PUSHD:
+        {
+            hstack[hsp].size = 4;
+            hstack[hsp].value = *((int *)&program[pc + 1]);
+
+            hsp += 1;
+            pc += 4;
+
+            break;
+        }
+        case PUSHQ:
+        {
+            hstack[hsp].size = 8;
+            hstack[hsp].value = *((long *)&program[pc + 1]);
+
+            hsp += 1;
+            pc += 8;
+
+            break;
+        }
+        case PUSHR:
+        {
+            hstack[hsp].size = 8;
+            hstack[hsp].value = registers[program[pc + 1]];
+
+            hsp++;
+            pc++;
+
+            break;
+        }
+        case POPV:
+        {
+            hsp--;
+            break;
+        }
+        case POPR:
+        {
+            registers[program[pc + 1]] = hstack[hsp].value;
+            pc++;
+
+            break;
+        }
+        case JMP:
+        {
+            pc = *((long *)&program[pc + 1]);
+
+            continue;
+        }
+        case JE:
+        {
+            long val1 = hstack[hsp - 1].value;
+            long val2 = hstack[hsp - 2].value;
+
+            if (val1 == val2)
+                pc = *((long *)&program[pc + 1]);
+            else
+                pc += 8;
+
+            continue;
+        }
+        case JNE:
+        {
+            long val1 = hstack[hsp - 1].value;
+            long val2 = hstack[hsp - 2].value;
+
+            if (val1 != val2)
+                pc = *((long *)&program[pc + 1]);
+            else
+                pc += 8;
+
+            continue;
+        }
+        case CALL:
+        {
+            cstack[csp] = pc;
+            csp++;
+
+            pc = sizeof(struct luna_header) + *((long *)&program[pc + 2]);
+
+            continue;
+        }
+        case RET:
+        {
+            if (csp == 0)
+                goto exit;
+
+            csp--;
+            pc = cstack[csp];
+
+            continue;
+        }
+        case ADD:
+        {
+            long val1 = hstack[hsp - 1].value;
+            long val2 = hstack[hsp - 2].value;
+
+            hsp -= 2;
+
+            hstack[hsp].size = 8;
+            hstack[hsp].value = val1 + val2;
+
+            break;
+        }
+        case SUB:
+        {
+            long val1 = hstack[hsp - 1].value;
+            long val2 = hstack[hsp - 2].value;
+
+            hsp -= 2;
+
+            hstack[hsp].size = 8;
+            hstack[hsp].value = val1 - val2;
+
+            break;
+        }
+        case MUL:
+        {
+            long val1 = hstack[hsp - 1].value;
+            long val2 = hstack[hsp - 2].value;
+
+            hsp -= 2;
+
+            hstack[hsp].size = 8;
+            hstack[hsp].value = val1 * val2;
+
+            break;
+        }
+        case DIV:
+        {
+            long val1 = hstack[hsp - 1].value;
+            long val2 = hstack[hsp - 2].value;
+
+            hsp -= 2;
+
+            hstack[hsp].size = 8;
+            hstack[hsp].value = val1 / val2;
+
+            break;
+        }
+        case MOD:
+        {
+            long val1 = hstack[hsp - 1].value;
+            long val2 = hstack[hsp - 2].value;
+
+            hsp -= 2;
+
+            hstack[hsp].size = 8;
+            hstack[hsp].value = val1 % val2;
+
+            break;
+        }
+        default:
+        {
+            printf("0x%x\n", byte);
+            rt->error(INVALID_OPCODE, "invalid opcode");
+            break;
+        }
         }
 
         pc++;
     }
 
-    exit:
+exit:
     return hstack[hsp - 1].value;
 }
