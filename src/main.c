@@ -75,9 +75,9 @@ int main(int argc, char **argv)
         0,
         0};
 
-    lexer_t *lexer = lexer_create("fun main(){ return 1; }");
+   /* lexer_t *lexer = lexer_create("fun main(){ return 1; }");
 
-    lexer_classify_string(lexer);
+    lexer_classify_string(lexer); */
 
     printf("luna: info: program exit code was %d\n", luna_execute(bytes, &rt));
 

@@ -1,0 +1,25 @@
+#+TITLE: Guide to LASM
+#+AUTHOR: Abb1x
+
+* Instructions
+
+** mov
+
+The mov instruction copies the data item referred to by its second operand into the location referred to by its first operand. 
+
+Syntax:
+
+#+begin_src c
+mov <dest>, <src>
+#+end_src
+
+** add
+
+The add instruction adds its two operands and stores its result into the first operand.
+
+Syntax:
+
+#+begin_src c
+add <dest>, <src>
+#+end_src
+ 
