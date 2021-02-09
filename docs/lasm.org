@@ -101,3 +101,12 @@ Syntax:
 #+begin_src c
 neg <dest>
 #+end_src 
+*** shl, shr
+These instructions shift the bits in their first operand's contents left and right.
+
+Syntax:
+
+#+begin_src c
+shl <dest>, <src>
+shr <dest>, <src>
+#+end_src
