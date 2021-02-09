@@ -3,7 +3,8 @@
 
 * Instructions
 
-** mov
+** Data Movement Instructions
+*** mov
 
 The mov instruction copies the data item referred to by its second operand into the location referred to by its first operand. 
 
@@ -13,7 +14,8 @@ Syntax:
 mov <dest>, <src>
 #+end_src
 
-** add
+** Arithmetic Instructions
+*** add
 
 The add instruction adds its two operands and stores its result into the first operand.
 
@@ -22,4 +24,80 @@ Syntax:
 #+begin_src c
 add <dest>, <src>
 #+end_src
- 
+
+*** sub
+
+The sub instruction substracts its two operands and stores its result into the first operand.
+
+Syntax:
+
+#+begin_src c
+sub <dest>, <src>
+#+end_src
+
+*** mul
+
+The mul instruction multiplies its two operands together and stores the result in the first operand. 
+
+Syntax:
+
+#+begin_src c
+mul <dest>, <src>
+#+end_src
+
+*** div
+The div instruction divides its two operands together and stores its result in the first operand.
+
+Syntax:
+
+#+begin_src c
+div <dest>, <src>
+#+end_src
+*** inc
+The inc instruction increments its operand by one.
+
+Syntax:
+
+#+begin_src c
+inc <dest>
+#+end_src
+
+*** dec
+
+The dec instruction decrements its operand by one.
+
+Syntax:
+
+#+begin_src c
+dec <dest>
+#+end_src
+
+** Logic Instructions
+*** and, or, xor
+
+These instructions perform the specified logical operation on their operands, placing the result in the first operand.
+
+Syntax:
+
+#+begin_src c
+and <dest>, <src>
+or  <dest>, <src>
+xor <dest>, <src>
+#+end_src
+
+*** not
+The not instruction logically negates the operand contents.
+
+Syntax:
+
+#+begin_src c
+not <dest>
+#+end_src
+*** neg
+Performs the two's complement negation of the operand contents.
+
+Syntax:
+
+#+begin_src c
+neg <dest>
+#+end_src 
